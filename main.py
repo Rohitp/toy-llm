@@ -1,8 +1,9 @@
 import torch
+import torch.nn.functional as func
 
 
 # Device check for runpod vs local.
-DEVICE = "Cuda" if torch.cuda.is_available() else "CPU"
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Block size of the token. TODO Iterate on the ideal block size. This can be at a word level as well, but this is getting too nig
 BLOCK_SIZE = 8
@@ -62,8 +63,10 @@ def batch_for_cuda():
         stacks_target.append(train_data[i+offset+1:BLOCK_SIZE+offset+1+i])
         offset += BLOCK_SIZE
 
-    source = torch.stack(stacks_source)
-    target = torch.stack(stacks_target)
+    source = torch.stack(stacks_source).to(DEVICE)
+    target = torch.stack(stacks_target).to(DEVICE)
+
+    print(source)
     return source, target
 
 batch_for_cuda()
@@ -78,4 +81,3 @@ for i in range(1, BLOCK_SIZE):
 
 
 
-# print(len(test_data))
