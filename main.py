@@ -1,6 +1,10 @@
 import torch
 import torch.nn.functional as func
 
+# import ToyLanguageModel
+
+from ToyLanguageModel import ToyLanguageModel
+
 
 # Device check for runpod vs local.
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -78,6 +82,14 @@ for i in range(1, BLOCK_SIZE):
     current = [train_data[:i]]
     next = [train_data[i]]
     # print( "For " + str(current) + "Next is" + str(next))
+
+
+model = ToyLanguageModel(charset_size)
+m = model.to(DEVICE)
+
+context = torch.zeros((1,1), dtype=torch.long, device=DEVICE)
+generated = decode(m.generate(context, max_tokens=500)[0].tolist())
+print(generated)
 
 
 

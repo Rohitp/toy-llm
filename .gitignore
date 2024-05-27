@@ -1,3 +1,4 @@
 # ignoring the virtual environment files as they use absolute paths by default. 
 ./test.py
+./.env
 llmvenv/
