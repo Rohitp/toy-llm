@@ -38,6 +38,9 @@ class ToyLanguageModel(nn.Module):
             logits = logits.view(B*T,C)
             targets = targets.view(B*T)
 
+
+            # Cross entropy loss looks at minimising the difference in probability of prediction
+            # A simplified formula for Loss=−(true label×log(predicted probability)+(1−true label)×log(1−predicted probability)) - ChatGPT
             loss = func.cross_entropy(logits, targets)
 
         return logits, loss 

@@ -65,11 +65,15 @@ test_data = data[int(0.8 * len(data)):]
 
 # Batching data into chunks with source and target data mapping it 
 def batch_for_cuda():
-    x = torch.randint(high=len(train_data) - BLOCK_SIZE, size= (BATCH_SIZE,))
+
+
+    # random indices to compare with
+    rand_tensor = torch.randint(high=len(train_data) - BLOCK_SIZE, size= (BATCH_SIZE,))
     offset = 0
     stacks_source = []
     stacks_target = []
-    for i in range(BATCH_SIZE):
+    for i in rand_tensor:
+
         x = train_data[i+offset:BLOCK_SIZE+offset+i]
         y = train_data[i+offset+1:BLOCK_SIZE+offset+1+i]
 
@@ -84,15 +88,13 @@ def batch_for_cuda():
     source = torch.stack(stacks_source).to(DEVICE)
     target = torch.stack(stacks_target).to(DEVICE)
 
-    print(source)
     return source, target
 
 
 
 
-
-model = ToyLanguageModel(charset_size)
-m = model.to(DEVICE)
+toyLM = ToyLanguageModel(charset_size)
+m = toyLM.to(DEVICE)
 
 context = torch.zeros((1,1), dtype=torch.long, device=DEVICE)
 generated = decode(m.generate(context, max_tokens=MAX_TOKENS)[0].tolist())
@@ -104,7 +106,12 @@ generated = decode(m.generate(context, max_tokens=MAX_TOKENS)[0].tolist())
 # Picking AdamW because of weight decay 
 # https://towardsdatascience.com/why-adamw-matters-736223f31b5d
 # model.parameters() is is charset_size x charset_size array of untrained values
-optimiser = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
+optimiser = torch.optim.AdamW(toyLM.parameters(), lr=LEARNING_RATE)
+
+for i in range(ITERATIONS):
+    sources, targets = batch_for_cuda()
+    logits, loss = toyLM.forward_pass(sources, targets)
+    
 
 
 
