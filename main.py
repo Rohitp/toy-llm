@@ -15,6 +15,20 @@ BLOCK_SIZE = 8
 #Size of the batch for parelel cuda processing
 BATCH_SIZE = 4
 
+# Iterations for learning
+ITERATIONS = 1000
+
+# Generating a max batch of untrained tokens at once
+
+MAX_TOKENS = 500
+
+# Picked a number. Need to experiment here
+# https://x.com/karpathy/status/801621764144971776?lang=en - though this might be a joke
+# https://stackoverflow.com/questions/42966393/is-it-good-learning-rate-for-adam-method
+LEARNING_RATE = 3e-4
+
+
+
 with open("./AliceInWonderLand.txt","r", encoding = "utf-8") as file:
     alice_text = file.read()
 
@@ -73,23 +87,24 @@ def batch_for_cuda():
     print(source)
     return source, target
 
-batch_for_cuda()
-# print(batch_for_cuda())
 
 
-# Batches and gets the next predicted character for any sequence of characters
-for i in range(1, BLOCK_SIZE):
-    current = [train_data[:i]]
-    next = [train_data[i]]
-    # print( "For " + str(current) + "Next is" + str(next))
 
 
 model = ToyLanguageModel(charset_size)
 m = model.to(DEVICE)
 
 context = torch.zeros((1,1), dtype=torch.long, device=DEVICE)
-generated = decode(m.generate(context, max_tokens=500)[0].tolist())
-print(generated)
+generated = decode(m.generate(context, max_tokens=MAX_TOKENS)[0].tolist())
+
+
+
+
+
+# Picking AdamW because of weight decay 
+# https://towardsdatascience.com/why-adamw-matters-736223f31b5d
+# model.parameters() is is charset_size x charset_size array of untrained values
+optimiser = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
 
 
 
